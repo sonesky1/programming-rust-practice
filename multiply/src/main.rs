@@ -1,3 +1,5 @@
+//Program to multiply all numbers given on command line starting with first number input
+
 use std::str::FromStr;
 use std::env;
 
