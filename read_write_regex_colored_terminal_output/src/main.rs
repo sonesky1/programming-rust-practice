@@ -13,6 +13,12 @@ struct Arguments {
     output: String,
 }
 
+fn replace(target: &str, replacement: &str, text: &str) -> Result<String, regex::Error>
+{
+   let regex = Regex::new(target)?;//question mark short circuits to regex error if fails here
+   Ok(regex.replace_all(text, replacement).to_string())
+}
+
 fn print_usage() {
     eprintln!(
         "{} - change occurence of one string into another",
@@ -44,33 +50,44 @@ fn parse_args() -> Arguments {
 
 fn main() {
     let args = parse_args();
-   println!("{:?}", args);
+  // println!("{:?}", args);
 
     //read to string, write functions
 
     let data = match fs::read_to_string(&args.filename) {
-        Ok(_) => {},
+        Ok(v) => v,
         Err(e) => {
             eprintln!(
                 "{} failed to write to file '{}': {:?}",
                 "Error:".red().bold(),
                 args.filename,
-                e
-            );
+                e);
             std::process::exit(1);
         }
     };
 
-    match fs::write(&args.output, &data) {
-        Ok(_) => {},
+    let replaced_data = match replace(&args.target, &args.replacement, &data){
+     Ok(v) => v,
+     Err(e) => {
+      eprintln!("{} failed to write to file '{}': {:?}",
+          "Error:".red().bold(), args.filename, e);
+       std::process::exit(1);
+     }
+    };
+
+
+
+
+
+    match fs::write(&args.output, &replaced_data) {
+        Ok(v) => v,
         Err(e) => {
             eprintln!(
                 "{} failed to write to file '{}': {:?}",
                 "Error".red().bold(),
                 args.filename,
-                e
-            );
-            std::process::exit(1)
-        }
-    };
+                e);
+            std::process::exit(1);
+            }
+        };
 }
